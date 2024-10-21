@@ -1,0 +1,221 @@
+% !TeX spellcheck = en_GB
+\ifcsname SlidesDistr\endcsname%
+\documentclass[handout,aspectratio=169]{beamer}
+\else%
+\documentclass[aspectratio=169]{beamer}
+\fi%
+\input{../syde556_lecture_slides_preamble}
+
+\date{October 16 \& 18, 2023}
+\title{SYDE 556/750 \\ Simulating Neurobiological Systems \\ Lecture 6: Recurrent Dynamics}
+
+\begin{document}
+	
+	\begin{frame}{}
+		\vspace{0.5cm}
+		\begin{columns}[c]
+			\column{0.6\textwidth}
+			\MakeTitle
+			\column{0.4\textwidth}
+			\includegraphics[width=\textwidth]{media/canada_150_mosaic_engine_small.jpg}
+		\end{columns}
+	\end{frame}
+
+	\begin{frame}{Feed Forward vs. Recurrent Connections}
+		\centering
+		\includegraphics{media/feed_forward_recurrent.pdf}
+	\end{frame}
+
+	\begin{frame}{Recurrence Experiments (I)}
+		\centering
+		\includegraphics[width=\textwidth]{media/fxp1_example.pdf}
+	\end{frame}
+
+	\begin{frame}{Recurrence Experiments (II)}
+		\centering
+		\includegraphics[width=\textwidth]{media/fmx_example.pdf}
+	\end{frame}
+
+	\begin{frame}{Recurrence Experiments (III)}
+		\centering
+		\includegraphics[width=\textwidth]{media/fxs_example.pdf}
+	\end{frame}
+
+
+	\begin{frame}{Making Sense of Dynamics}
+		\centering
+		\includegraphics[width=\textwidth]{media/synaptic_filter.pdf} 		
+	\end{frame}
+
+	%\begin{frame}{Phase Portraits}
+%		\centering
+%		\includegraphics[width=\textwidth]{media/phase_portraits.pdf}
+%	\end{frame}
+
+	\begin{frame}{Behaviour of a Recurrent Connection}
+	Feed-forward
+			\begin{align*}
+				x(t) = g(u(t)) * h(t)				
+			\end{align*}		
+	Recurrent
+			\begin{align*}
+	x(t) &= (g(u(t)) + f(x(t))) * h(t)	\\
+	X(s) &= (G(s) + F(s))H(s) \\
+	X(s) &= (G(s) + F(s)){1 \over {1+s\tau}} \\
+	X(s) + s\tau X(s) &= G(s) + F(s) \\
+	s\tau X(s) &= G(s) + F(s) - X(s) \\
+	sX(s) &= {{F(s) - X(s)} \over \tau} + {G(s) \over \tau} \\
+	{dx \over dt} &= {{f(x(t))-x(t)} \over \tau} + {{g(u(t))} \over \tau}
+			\end{align*}		
+	
+	\end{frame}
+
+	\begin{frame}{Behaviour of a Recurrent Connection}
+	\begin{align*}
+		{dx \over dt} &= {{f(x(t))-x(t)} \over \tau} + {{g(u(t))} \over \tau}
+	\end{align*}		
+	If we want this
+	\begin{align*}
+	{dx \over dt} &= a(x) + b(u)
+	\end{align*}
+	Then we set
+	\begin{align*}
+	f(x) &= \tau a(x) + x \\
+	g(x) &= \tau b(u)
+	\end{align*}
+	And we get
+	\begin{align*}
+	{dx \over dt} &= {{(\tau a(x) + x) - x} \over \tau} + {{(\tau b(u))} \over \tau} \\
+	{dx \over dt} &= {{a(x)}} + {{b(u)}}
+	\end{align*}		
+	
+	
+			
+	
+	
+\end{frame}
+
+
+	\begin{frame}{Implementing Dynamics using a Neural Ensemble}
+		\centering
+		\includegraphics[width=\textwidth]{media/lti_integrator_vs_neural.pdf} 
+	\end{frame}
+
+	\begin{frame}{Implementing Dynamical Systems as a Neural Ensemble}
+		\begin{columns}[t]
+			\column{0.5\textwidth}
+			\centering
+			\hl{LTI System}
+			\begin{align*}
+				\phi(\vec u, \vec x) &= \mat A \vec x + \mat B \vec u \\
+				\phi'(\vec u, \vec x) &= \mat A' \vec x + \mat B' \vec u \\
+				\mat A' &= \tau \mat A + \mat I \\ \mat B' &= \tau \mat B \,.
+			\end{align*}
+			\column{0.5\textwidth}
+			\centering
+			\hl{Additive Time-Invariant System}
+			\begin{align*}
+				\phi(\vec u, \vec x) &= f(\vec x) + g(\vec u) \\
+				\phi'(\vec u, \vec x) &= f'(\vec x) + g'(\vec u) \\
+				f'(\vec x) &= \tau f(\vec x) + \vec x \\
+				g'(\vec u) &= \tau g(\vec u)
+			\end{align*}
+		\end{columns}
+		\vspace{1cm}
+		\centering \hl{\enquote{General} Recipe}\\[0.25cm]
+		Scale the original dynamics by $\tau$, add feedback $\vec x$
+	\end{frame}
+
+	\begin{frame}{NEF Principle 3: Dynamics}
+	\begin{columns}[b]
+		\column{0.5\textwidth}
+		\centering
+		\hl{Time-Invariant Dynamical System}\\
+		\begin{align*}
+			\frac{\mathrm{d}\vec x(t)}{\mathrm{d}t} &= f(\vec x(t), \vec u(t))
+		\end{align*}
+		\column{0.5\textwidth}
+		\centering
+		\hl{Linear Time-Invariant (LTI)}
+		\hl{Dynamical System}
+		\begin{align*}
+			\frac{\mathrm{d}\vec x(t)}{\mathrm{d}t} &= \mat A \vec x + \mat B \vec u
+		\end{align*}
+	\end{columns}
+	\vspace{0.75cm}
+	\begin{mdframed}
+		\textbf{NEF Principle 3 -- Dynamics}\\
+		Neural dynamics are characterized by considering neural representations as control theoretic state variables. We can use control theory (and dynamical systems theory) to analyse and construct these systems.
+	\end{mdframed}
+\end{frame}
+
+\begin{frame}{Low-pass Filter Example}
+Desired behaviour
+\begin{align*}
+	{dx \over dt} = {{u - x} \over \tau_{desired}}	
+\end{align*}
+Feed-forward input
+\begin{align*}
+	g(u) &= \tau_{synapse} ({u \over \tau_{desired}}) \\
+	g(u) &= {\tau_{synapse} \over \tau_{desired}} u	
+\end{align*}
+Recurrent
+\begin{align*}
+	f(x) &= \tau_{synapse} ({{-x} \over \tau_{desired}}) + x \\
+	f(x) &= (1-{\tau_{synapse} \over \tau_{desired}})x			
+\end{align*}	
+\end{frame}	
+
+	\begin{frame}{Integrator Example (I)}
+		\centering
+		\includegraphics[width=\textwidth]{media/example_integrator.pdf}
+	\end{frame}
+
+	\begin{frame}{Integrator Example (II)}
+		\centering
+		\includegraphics[width=\textwidth]{media/example_integrator_phases.pdf}
+	\end{frame}
+
+	\begin{frame}{Oscillator Example (I)}
+		\centering
+		\includegraphics[width=\textwidth]{media/example_oscillator.pdf}
+	\end{frame}
+
+	\begin{frame}{Oscillator Example (II)}
+		\centering
+		\includegraphics[width=\textwidth]{media/example_oscillator_phases.pdf}
+	\end{frame}
+
+	\begin{frame}{Lorentz Attractor}
+		\centering
+		\includegraphics[width=\textwidth]{media/example_lorentz.pdf}
+		\begin{align*}
+			\frac{\mathrm{d}\vec x(t)}{\mathrm{d}t} &= \begin{pmatrix}
+			10 x_2(t)-10x_1(t) \\
+			-x_1(t) x_3(t)-x_2(t) \\
+			x_1(t) x_2(t) - \frac{8}{3}(x_3(t)+28)-28
+			\end{pmatrix}
+		\end{align*}
+	\end{frame}
+
+	\begin{frame}{Heart Shape}
+		\centering
+		\includegraphics[width=\textwidth]{media/example_heart.pdf}
+	\end{frame}
+
+	\begin{frame}{Horizontal Eye Control}
+		\centering
+		\includegraphics[width=\textwidth]{media/example_eye_control.pdf}
+	\end{frame}
+
+	\backupbegin
+
+	\begin{frame}[noframenumbering]{Image sources}
+		\small
+		\textbf{Title slide}\\\enquote{The Canada 150 Mosaic Mural}\\Author: Mosaic Canada Murals.\\From \href{https://commons.wikimedia.org/wiki/File:Canada_150_Mosaic_Engine.jpg}{Wikimedia}.
+	\end{frame}
+
+
+	\backupend
+	
+\end{document}

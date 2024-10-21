@@ -1,0 +1,212 @@
+% !TeX spellcheck = en_GB
+\ifcsname SlidesDistr\endcsname%
+\documentclass[handout,aspectratio=169]{beamer}
+\else%
+\documentclass[aspectratio=169]{beamer}
+\fi%
+\input{../syde556_lecture_slides_preamble}
+
+\date{September 27 \& October 2, 2023}
+\title{SYDE 556/750 \\ Simulating Neurobiological Systems \\ Lecture 5: Feed-Forward Transformation}
+
+\begin{document}
+	
+	\begin{frame}{}
+		\vspace{0.5cm}
+		\begin{columns}[c]
+			\column{0.6\textwidth}
+			\MakeTitle
+			\column{0.4\textwidth}
+			\includegraphics[width=\textwidth]{media/yellow_butterfly_by_albert_bierstadt_small.jpg}
+		\end{columns}
+	\end{frame}
+
+	\begin{frame}{Introduction}
+    \begin{columns}[c]
+			\column{0.6\textwidth}
+        \begin{itemize}
+          \setlength\itemsep{0.5cm}
+          \item We've only talked about representation til now
+          \begin{itemize}
+            \setlength\itemsep{0.25cm}
+            \item What about computation?
+          \end{itemize}
+          \item We start by focusing on the state of a network after learning and development
+          \item A kind of hypothesis testing and generation 
+        \end{itemize}
+      \column{0.4\textwidth}
+        \includegraphics[width=\textwidth]{media/dalle_child_adult.png}
+        \raggedleft\small DALL-E AI Generated Art, 2022
+    \end{columns}
+	\end{frame}
+
+  \begin{frame}{NEF Principle 2: Transformation}
+		\centering
+		\includegraphics[scale=1.175]{media/transformation_fully_connected.pdf}
+		\begin{mdframed}
+			\textbf{NEF Principle 2 -- Transformation}\\
+			Connections between populations describe \emph{transformations} of neural representations. Transformations are functions of the variables represented by neural populations.
+		\end{mdframed}
+	\end{frame}
+	
+	\begin{frame}{A Tale of Two Populations (I)}
+		\hspace*{-1.2cm}%
+		\includegraphics<1>[width=1.175\textwidth]{media/transformation_01.pdf}%
+		\includegraphics<2>[width=1.175\textwidth]{media/transformation_02.pdf}%
+	\end{frame}
+
+	\begin{frame}{Communication Channel Experiment: Same input signal}
+		\includegraphics[width=\textwidth]{media/two_populations_decoding.pdf}
+	\end{frame}
+
+	\begin{frame}{A Tale of Two Populations (II)}
+		\hspace*{-1.2cm}%
+		\includegraphics<1>[width=1.175\textwidth]{media/transformation_03.pdf}%
+		\includegraphics<2>[width=1.175\textwidth]{media/transformation_04.pdf}%
+	\end{frame}
+
+	\begin{frame}{Communication Channel Experiment: Populations in series}
+		\includegraphics<1>[width=\textwidth]{media/two_populations_decoding.pdf}
+		\includegraphics<2>[width=\textwidth]{media/two_populations_decoding_series.pdf}
+	\end{frame}
+
+	\begin{frame}{Computing Synaptic Weights: Step 1 -- Encoding Matrix}
+		\hspace*{-1.2cm}%
+		\includegraphics<1>[width=1.175\textwidth]{media/transformation_04.pdf}%
+		\includegraphics<2>[width=1.175\textwidth]{media/transformation_05.pdf}%
+	\end{frame}
+
+	\begin{frame}{Computing Synaptic Weights: Step 2 -- Scaled Encoding Matrix}
+		\hspace*{-1.2cm}%
+		\includegraphics<1>[width=1.175\textwidth]{media/transformation_06.pdf}%
+	\end{frame}
+
+	\begin{frame}{Computing Synaptic Weights: Step 3 -- $\mat W = \mat E \mat D$}
+		\hspace*{-1.2cm}%
+		\includegraphics<1>[width=1.175\textwidth]{media/transformation_07.pdf}%
+	\end{frame}
+
+  \begin{frame}{Computational Complexity}
+    \begin{itemize}
+      \setlength\itemsep{0.25cm}
+        \item Weights - multiplying $\vec a \in \mathbb{R}^{n}$ with $\mat W \in \mathbb{R}^{m \times n}$ is $\mathcal{O}(n m)$ i.e., $\approx\mathcal{O}(n^2)$
+        \item Decoding - $\hat{\vec x} = \mat D \vec a$ is $\mathcal{O}(d n)$
+        \item Encoding - $\vec J = \mat E \hat{\vec x} + \vec J_\mathrm{bias}$ is $\mathcal{O}(d m)$
+        \item Encoding/Decoding - $\mathcal{O}(d (n + m))$ or $\approx\mathcal{O}(d n)$ for $n = m$
+        \item So if $d$ is small we get a linear complexity $\mathcal{O}(n)$
+        \item Therefore, sequential decoding and re-encoding saves a lot of time compared to using actual synaptic weights
+        \item One reason why Nengo is so fast compared to other SNN simulators
+      \end{itemize}
+  \end{frame}
+
+	\begin{frame}{Computing Functions}
+		\hspace*{-1.2cm}%
+		\includegraphics<1>[width=1.175\textwidth]{media/transformation_02.pdf}%
+		\includegraphics<2>[width=1.175\textwidth]{media/transformation_08.pdf}%
+		\includegraphics<3>[width=1.175\textwidth]{media/transformation_09.pdf}
+		\begin{overlayarea}{\textwidth}{1cm}
+			\only<3->{\hl{Function Decoder} $
+				\mat D^f = \left( (\mat A \mat A^\T + N \sigma^2 \mat I)^{-1} \mat A \mat Y^\T \right)^\T \,, \quad
+				\text{where } \big ( \mat Y \big )_{ik} = \big( f(\vec x_k) \big)_i 
+			$}
+		\end{overlayarea}
+	\end{frame}
+
+	\begin{frame}{Decoding Functions -- Using a Few Neurons}
+		\includegraphics<1>[width=\textwidth]{media/function_decodings_10.pdf}%
+	\end{frame}
+
+	\begin{frame}{Decoding Functions -- Using More Neurons}
+		\includegraphics<1>[width=\textwidth]{media/function_decodings_20.pdf}%
+		\includegraphics<2>[width=\textwidth]{media/function_decodings_50.pdf}%
+		\includegraphics<3>[width=\textwidth]{media/function_decodings_100.pdf}%
+	\end{frame}
+	
+	\begin{frame}{Computing Functions -- Weight Matrix}
+		\hspace*{-1.2cm}%
+		\includegraphics<1>[width=1.175\textwidth]{media/transformation_10.pdf}
+		\begin{overlayarea}{\textwidth}{1cm}
+			\centering
+			$\mat W^f = \mat E \mat D^f$
+		\end{overlayarea}
+	\end{frame}
+
+  \begin{frame}{Recipe for any feedforward transformation}
+    \begin{enumerate}
+      \setlength\itemsep{0.25cm}
+        \item Define encoding for two populations (input/output)
+        \item Write the transformation with the represented input variables
+        \item Solve for the $\mat D^f$ for that transformation for the input population
+        \item Sub 3. into the encoding for the output variable
+      \end{enumerate}
+  \end{frame}
+
+	\begin{frame}{Computing Multivariate Functions}
+		\centering
+		\includegraphics{media/network_legend_3.pdf}\\[0.5cm]
+		\begin{columns}[t]
+			\column{0.33\textwidth}
+			\centering
+			\hl{Linear Superposition}\\[0.25cm]
+			$W^{f_1} \vec a_1(\vec x) + W^{f_2} \vec a_2 (\vec y)$
+			\includegraphics{media/network_a.pdf}
+			\pause
+			\column{0.33\textwidth}
+			\centering
+			\hl{Nonlinear Functions}\\[0.25cm]
+			Multi-dimensional $\vec z$
+			\includegraphics{media/network_c.pdf}
+			\pause
+			\column{0.33\textwidth}
+			\centering
+			\textbf{(Dendritic Computation)}\\[0.25cm]
+			Exploit dendritic nonlinearity
+			\includegraphics{media/network_d.pdf}
+		\end{columns}
+	\end{frame}
+
+	\begin{frame}{Computing Multivariate Functions -- Linear Superposition}
+		\begin{columns}[c]
+			\column{0.33\textwidth}
+			\centering
+			\hl{Linear Superposition}\\[0.25cm]
+			\includegraphics{media/network_a.pdf}
+			\column{0.66\textwidth}
+			\includegraphics[width=\textwidth]{media/multivariate_addition.pdf}
+		\end{columns}
+ 	\end{frame}
+
+
+	\begin{frame}{Computing Multivariate Functions -- Multiplication}
+		\begin{columns}[c]
+			\column{0.33\textwidth}
+			\centering
+			\hl{Nonlinear Functions}\\[0.25cm]
+			Multi-dimensional $\vec z$
+			\includegraphics{media/network_c.pdf}\\[0.25cm]
+			\begin{overlayarea}{\textwidth}{2.75cm}
+				\only<2->{Multiplication is useful...
+				\begin{itemize}
+					\item Gating of signals
+					\item Attention effects
+					\item Binding
+					\item Statistical inference				
+				\end{itemize}}
+			\end{overlayarea}
+			\column{0.66\textwidth}
+			\includegraphics[width=\textwidth]{media/multivariate_multiplication.pdf}
+		\end{columns}
+	\end{frame}
+
+
+	\backupbegin
+	
+	\begin{frame}[noframenumbering]{Image sources}
+		\small
+		\textbf{Title slide}\\\enquote{Yellow Butterfly}\\Author: Albert Bierstadt, circa 1890.\\From \href{https://commons.wikimedia.org/wiki/File:Yellow_Butterfly_by_Albert_Bierstadt.jpeg}{Wikimedia}.
+	\end{frame}
+
+
+	\backupend
+	
+\end{document}
